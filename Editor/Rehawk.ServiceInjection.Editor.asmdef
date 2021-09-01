@@ -2,7 +2,7 @@
     "name": "Rehawk.ServiceInjection.Editor",
     "rootNamespace": "Rehawk.ServiceInjection.Editor",
     "references": [
-        "GUID:e7504ab3bff94c74295641ef92b7c08f"
+        "GUID:6cb3939238e1b34458e3ae0140aed919"
     ],
     "includePlatforms": [
         "Editor"
