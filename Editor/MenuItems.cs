@@ -25,7 +25,7 @@ namespace Rehawk.ServiceInjection.Editor
             }
         }
 
-        [MenuItem("GameObject/Service Injection/SceneContext", false, 51)]
+        [MenuItem("GameObject/Service Injection/SceneContext", false, 10)]
         private static void CreateSceneContext()
         {
             GameObject obj = new GameObject("SceneContext");
