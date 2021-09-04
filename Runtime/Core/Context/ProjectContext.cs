@@ -97,6 +97,14 @@ namespace Rehawk.ServiceInjection
             return null;
         }
 
+		private void Awake() 
+		{
+			if (Application.isPlaying) 
+			{
+				GameObject.DontDestroyOnLoad(gameObject);
+			}
+		}
+		
         public void EnsureIsInitialized()
         {
             // Do nothing - Initialize occurs in Instance property
