@@ -4,8 +4,20 @@ namespace Rehawk.ServiceInjection
 {
     public interface IBootstrapper
     {
+        /// <summary>
+        /// Is called to register all types which should be injected or receive injection.
+        /// </summary>
         void Boot();
+        
+        /// <summary>
+        /// Is called to handle resolving of queued instances by cref="QueueForResolve{T}(T instance)"
+        /// </summary>
         void Resolve();
+        
+        /// <summary>
+        /// Is called after all bootstrappers of the bootstrapper's context are booted.
+        /// </summary>
+        void BootCompleted();
 
         /// <inheritdoc cref="ServiceLocator.Register{T}()"/>
         Registry<T, T> Register<T>();
@@ -30,5 +42,11 @@ namespace Rehawk.ServiceInjection
 
         /// <inheritdoc cref="ServiceLocator.CreateInstance(Type, object[])"/>
         object CreateInstance(Type type, params object[] args);
+
+        /// <summary>
+        ///     Registers a instance to which will be injected after the boot process.
+        /// </summary>
+        /// <param name="instance">The instance which will injected to.</param>
+        void QueueForResolve<T>(T instance);
     }
 }

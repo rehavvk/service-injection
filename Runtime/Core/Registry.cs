@@ -12,6 +12,7 @@ namespace Rehawk.ServiceInjection
 
         protected Func<object> factory;
         protected object[] arguments;
+        protected Func<object[]> getLazyArguments;
         protected Scene? scene;
 
         internal abstract Type ContractType { get; }
@@ -40,6 +41,11 @@ namespace Rehawk.ServiceInjection
         public object[] Arguments
         {
             get { return arguments; }
+        }
+
+        internal Func<object[]> GetLazyArguments
+        {
+            get { return getLazyArguments; }
         }
 
         internal Scene Scene
@@ -149,6 +155,16 @@ namespace Rehawk.ServiceInjection
         public Registry<TContract, TConcrete> WithArguments(params object[] arguments)
         {
             this.arguments = arguments;
+            return this;
+        }
+        
+        /// <summary>
+        ///     Registers a set of arguments which will be used during the injection process. Arguments are preferred and only if they do not contain a matching instance will an attempt be made to pull a registered instance.
+        /// </summary>
+        /// <param name="method">The mothod which will be called to receive arguments.</param>
+        public Registry<TContract, TConcrete> WithLazyArguments(Func<object[]> method)
+        {
+            this.getLazyArguments = method;
             return this;
         }
     }

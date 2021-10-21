@@ -246,7 +246,7 @@ namespace Rehawk.ServiceInjection
             object instance = registry.Factory?.Invoke();
             if (instance == null)
             {
-                instance = CreateInstance(registry.ConcreteType, !registry.IsSceneScoped, registry.Scene, registry.OnInstantiate, registry.Arguments);
+                instance = CreateInstance(registry.ConcreteType, !registry.IsSceneScoped, registry.Scene, registry.OnInstantiate, registry.Arguments, registry.GetLazyArguments);
             }
 
             if (!registry.IsSceneScoped)
@@ -264,7 +264,7 @@ namespace Rehawk.ServiceInjection
             Func<object> factory = registry.Factory;
             if (factory == null)
             {
-                factory = () => CreateInstance(registry.ConcreteType, !registry.IsSceneScoped, registry.Scene, registry.OnInstantiate, registry.Arguments);
+                factory = () => CreateInstance(registry.ConcreteType, !registry.IsSceneScoped, registry.Scene, registry.OnInstantiate, registry.Arguments, registry.GetLazyArguments);
             }
 
             if (!registry.IsSceneScoped)
@@ -327,9 +327,26 @@ namespace Rehawk.ServiceInjection
             return CreateGeneralClass(type, args);
         }
 
-        private static object CreateInstance(Type concreteType, bool inGlobalScope, Scene scene, Action<object> onInstantiate, object[] arguments)
+        private static object CreateInstance(Type concreteType, bool inGlobalScope, Scene scene, Action<object> onInstantiate, object[] arguments, Func<object[]> getLazyArguments)
         {
             object instance;
+
+            // Get Lazy arguments and merge them with the basic arguments.
+            object[] lazyArguments = getLazyArguments?.Invoke();
+
+            if (lazyArguments != null && lazyArguments.Length > 0)
+            {
+                if (arguments == null)
+                {
+                    arguments = lazyArguments;
+                }
+                else
+                {
+                    int argumentsLength = arguments.Length;
+                    Array.Resize(ref arguments, arguments.Length + lazyArguments.Length);
+                    Array.Copy(lazyArguments, 0, arguments, argumentsLength, lazyArguments.Length);
+                }
+            }
             
             if (IsComponent(concreteType))
             {

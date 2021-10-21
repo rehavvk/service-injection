@@ -22,12 +22,13 @@ namespace Rehawk.ServiceInjection
             }
         }
 
-        protected abstract void Boot();
-        
-        protected void QueueForResolve<T>(T instance)
+        void IBootstrapper.BootCompleted()
         {
-            queuedForResolve.Enqueue(instance);
+            OnBootCompleted();
         }
+
+        protected abstract void Boot();
+        protected virtual void OnBootCompleted() {}
         
         /// <inheritdoc/>
         public Registry<T, T> Register<T>()
@@ -75,6 +76,12 @@ namespace Rehawk.ServiceInjection
         public object CreateInstance(Type type, params object[] args)
         {
             return ServiceLocator.CreateInstance(type, args);
+        }
+        
+        /// <inheritdoc/>
+        public void QueueForResolve<T>(T instance)
+        {
+            queuedForResolve.Enqueue(instance);
         }
     }
 }

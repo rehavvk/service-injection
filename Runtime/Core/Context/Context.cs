@@ -26,6 +26,11 @@ namespace Rehawk.ServiceInjection
                 bootstrapper.Resolve();
             }
             
+            foreach (IBootstrapper bootstrapper in monoBootstrapper)
+            {
+                bootstrapper.BootCompleted();
+            }
+            
             isInitialized = true;
         }
     }
