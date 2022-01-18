@@ -214,7 +214,7 @@ namespace Rehawk.ServiceInjection
                     }
                 }
             }
-
+            
             return default;
         }
         
@@ -255,12 +255,10 @@ namespace Rehawk.ServiceInjection
         
         private static void CreateSingletonResolver(Registry registry)
         {
-            // (fred): Removed cause of labeled resolvers.
-            // Don't create resolvers for already created types.
-            // if ((!registry.IsSceneScoped && HasResolver(registry.ContractType, false)) || (registry.IsSceneScoped && HasSceneResolver(registry.ContractType, registry.Scene)))
-            // {
-            //     return;
-            // }
+            if ((!registry.IsSceneScoped && HasResolver(registry.ContractType, registry.Label, false)) || (registry.IsSceneScoped && HasSceneResolver(registry.Scene, registry.ContractType, registry.Label)))
+            {
+                return;
+            }
 
             object instance = registry.Factory?.Invoke();
             if (instance == null)
@@ -328,9 +326,7 @@ namespace Rehawk.ServiceInjection
 
         private static SceneData GetOrCreateSceneData(Scene scene)
         {
-            SceneData sceneData;
-
-            if (!sceneResolvers.TryGetValue(scene, out sceneData))
+            if (!sceneResolvers.TryGetValue(scene, out SceneData sceneData))
             {
                 var sceneObj  = new GameObject($"ServiceLocator - Scene: {scene.name}");
                 
@@ -659,27 +655,29 @@ namespace Rehawk.ServiceInjection
         ///     Checks whether there's registered a resolver for a specific type.
         /// </summary>
         /// <param name="contractType">The specific type.</param>
+        /// <param name="label">Whether to search for a labeled resolver.</param>
         /// <param name="includeActiveScene">Whether to search for a scene specific resolver if a global one isn't found.</param>
         /// <returns>True if registered, false otherwise.</returns>
-        public static bool HasResolver(Type contractType, bool includeActiveScene = true)
+        public static bool HasResolver(Type contractType, object label = DEFAULT_LABEL, bool includeActiveScene = true)
         {
-            return globalResolvers.ContainsKey(contractType) || (includeActiveScene && HasSceneResolver(contractType, GetActiveScene()));
+            return globalResolvers.TryGetValue(contractType, out ResolverCollection collection) && collection.TryGetByLabel(label, out Resolver _) || (includeActiveScene && HasSceneResolver(GetActiveScene(), contractType, label));
         }
         
         /// <summary>
         ///     Checks whether there's created a scene-specific resolver for a specific type in the specified scene.
         /// </summary>
-        /// <param name="contractType">The specific type.</param>
         /// <param name="scene">The specific scene.</param>
+        /// <param name="contractType">The specific type.</param>
+        /// <param name="label">Whether to search for a labeled resolver.</param>
         /// <returns>True if resolver exists, false otherwise.</returns>
-        public static bool HasSceneResolver(Type contractType, Scene scene)
+        public static bool HasSceneResolver(Scene scene, Type contractType, object label = DEFAULT_LABEL)
         {
             if (!sceneResolvers.TryGetValue(scene, out SceneData sceneData))
             {
                 return false;
             }
 
-            return sceneData.Resolvers.ContainsKey(contractType);
+            return sceneData.Resolvers.TryGetValue(contractType, out ResolverCollection collection) && collection.TryGetByLabel(label, out Resolver _);
         }
 
         private static Scene GetActiveScene()
