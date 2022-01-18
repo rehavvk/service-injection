@@ -11,21 +11,21 @@ namespace Rehawk.ServiceInjection
         }
         
         /// <inheritdoc cref="ServiceLocator.Resolve{T}"/>
-        public static T Resolve<T>(this object _, bool includeActiveScene = true)
+        public static T Resolve<T>(this object _, object label = ServiceLocator.DEFAULT_LABEL, bool includeActiveScene = true)
         {
-            return ServiceLocator.Resolve<T>(includeActiveScene);
+            return ServiceLocator.Resolve<T>(label, includeActiveScene);
         }
 
-        /// <inheritdoc cref="ServiceLocator.ResolveFromScene{T}()"/>
-        public static T ResolveFromScene<T>(this object _)
+        /// <inheritdoc cref="ServiceLocator.ResolveFromScene{T}(object)"/>
+        public static T ResolveFromScene<T>(this object _, object label = ServiceLocator.DEFAULT_LABEL)
         {
-            return ServiceLocator.ResolveFromScene<T>();
+            return ServiceLocator.ResolveFromScene<T>(label);
         }
 
-        /// <inheritdoc cref="ServiceLocator.ResolveFromScene{T}(Scene)"/>
-        public static T ResolveFromScene<T>(this object _, Scene scene)
+        /// <inheritdoc cref="ServiceLocator.ResolveFromScene{T}(Scene, object)"/>
+        public static T ResolveFromScene<T>(this object _, Scene scene, object label = ServiceLocator.DEFAULT_LABEL)
         {
-            return ServiceLocator.ResolveFromScene<T>(scene);
+            return ServiceLocator.ResolveFromScene<T>(scene, label);
         }
     }
 }

@@ -10,6 +10,7 @@ namespace Rehawk.ServiceInjection
 
         protected event Action<object> onInstantiate;
 
+        protected object label;
         protected Func<object> factory;
         protected object[] arguments;
         protected Func<object[]> getLazyArguments;
@@ -21,6 +22,11 @@ namespace Rehawk.ServiceInjection
         internal bool AsSingle
         {
             get { return asSingle; }
+        }
+
+        internal object Label
+        {
+            get { return label; }
         }
         
         internal bool IsSceneScoped
@@ -165,6 +171,12 @@ namespace Rehawk.ServiceInjection
         public Registry<TContract, TConcrete> WithLazyArguments(Func<object[]> method)
         {
             this.getLazyArguments = method;
+            return this;
+        }
+        
+        public Registry<TContract, TConcrete> WithLabel(object label)
+        {
+            this.label = label;
             return this;
         }
     }

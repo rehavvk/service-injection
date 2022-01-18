@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -9,14 +11,15 @@ namespace Rehawk.ServiceInjection
 {
     public static class ServiceLocator
     {
-        private const string MULTISCENE_GAME_OBJECT_NAME = "ServiceLocator - Multi-scene";
-
-        private static readonly Dictionary<Type, Resolver> globalResolvers = new Dictionary<Type, Resolver>();
-        private static readonly Dictionary<Scene, SceneData> sceneResolvers = new Dictionary<Scene, SceneData>();
+        public const string MULTISCENE_GAME_OBJECT_NAME = "ServiceLocator - Multi-scene";
+        public const object DEFAULT_LABEL = null;
         
-        private static readonly Dictionary<Type, Registry> register = new Dictionary<Type, Registry>();
+        private static readonly Dictionary<Type, ResolverCollection> globalResolvers = new();
+        private static readonly Dictionary<Scene, SceneData> sceneResolvers = new();
+        
+        private static readonly List<Registry> register = new();
 
-        private static readonly List<Scene> tempSceneList = new List<Scene>();
+        private static readonly List<Scene> tempSceneList = new();
         
         private static GameObject multiSceneGameObject;
 
@@ -41,9 +44,9 @@ namespace Rehawk.ServiceInjection
         
         internal static void EndRegister()
         {
-            foreach (KeyValuePair<Type, Registry> entry in register)
+            foreach (Registry registry in register)
             {
-                CreateResolver(entry.Value);
+                CreateResolver(registry);
             }
             
             register.Clear();
@@ -56,7 +59,7 @@ namespace Rehawk.ServiceInjection
         public static Registry<T, T> Register<T>()
         {
             var registry = new Registry<T, T>();
-            register.Add(typeof(T), registry);
+            register.Add(registry);
             return registry;
         }
         
@@ -68,7 +71,7 @@ namespace Rehawk.ServiceInjection
         public static Registry<TContract, TConcrete> Register<TContract, TConcrete>() where TConcrete : TContract
         {
             var registry = new Registry<TContract, TConcrete>();
-            register.Add(typeof(TContract), registry);
+            register.Add(registry);
             return registry;
         }
         
@@ -125,17 +128,18 @@ namespace Rehawk.ServiceInjection
         ///     Searches for a global object first, if nothing is found and <paramref name="includeActiveScene" /> is true then it
         ///     searches for a scene specific resolver.
         ///     Make sure the type is registered first.
-        ///     <seealso cref="ResolveFromScene{T}()" />
+        ///     <seealso cref="ResolveFromScene{T}(string)" />
         /// </summary>
         /// <typeparam name="T">The type to locate an implementation for.</typeparam>
+        /// <param name="label">Whether to search for a labeled resolver.</param>
         /// <param name="includeActiveScene">Whether to search for a scene specific resolver if a global one isn't found.</param>
         /// <returns>
         ///     The transient object or singleton that is mapped to the specified type.
         ///     If nothing is registered for <typeparamref name="T" /> the default value for the type is returned.
         /// </returns>
-        public static T Resolve<T>(bool includeActiveScene = true)
+        public static T Resolve<T>(object label = DEFAULT_LABEL, bool includeActiveScene = true)
         {
-            return (T) ResolveByType(typeof(T), includeActiveScene);
+            return (T) ResolveByType(typeof(T), label, includeActiveScene);
         }
 
         /// <summary>
@@ -143,13 +147,14 @@ namespace Rehawk.ServiceInjection
         ///     Make sure the type is registered first.
         /// </summary>
         /// <typeparam name="T">The type to locate an implementation for.</typeparam>
+        /// <param name="label">Whether to search for a labeled resolver.</param>
         /// <returns>
         ///     The transient object or singleton that is mapped to the specified type.
         ///     If nothing is registered for <typeparamref name="T" /> the default value for the type is returned.
         /// </returns>
-        public static T ResolveFromScene<T>()
+        public static T ResolveFromScene<T>(object label = DEFAULT_LABEL)
         {
-            return ResolveFromScene<T>(GetActiveScene());
+            return ResolveFromScene<T>(GetActiveScene(), label);
         }
         
         /// <summary>
@@ -157,13 +162,15 @@ namespace Rehawk.ServiceInjection
         ///     Make sure the type is registered first.
         /// </summary>
         /// <typeparam name="T">The type to locate an implementation for.</typeparam>
+        /// <param name="scene">Specify the scene in which the resolver should be searched for.</param>
+        /// <param name="label">Whether to search for a labeled resolver.</param>
         /// <returns>
         ///     The transient object or singleton that is mapped to the specified type.
         ///     If nothing is registered for <typeparamref name="T" /> the default value for the type is returned.
         /// </returns>
-        public static T ResolveFromScene<T>(Scene scene)
+        public static T ResolveFromScene<T>(Scene scene, object label = DEFAULT_LABEL)
         {
-            return (T) ResolveByTypeForScene(typeof(T), scene);
+            return (T) ResolveByTypeForScene(typeof(T), scene, label);
         }
 
         /// <summary>
@@ -180,43 +187,54 @@ namespace Rehawk.ServiceInjection
             }
         }
         
-        private static object ResolveByType(Type contractType, bool includeActiveScene = true)
+        private static object ResolveByType(Type contractType, object label, bool includeActiveScene = true)
         {
             // Can happen if a registered type depends on another registered type.
-            if (register.TryGetValue(contractType, out Registry registry))
+            Registry registry = register.FirstOrDefault(r => r.ContractType == contractType && r.Label == label);
+            if (registry != null)
             {
                 CreateResolver(registry);
             }
 
-            if (globalResolvers.TryGetValue(contractType, out Resolver resolver))
+            if (globalResolvers.TryGetValue(contractType, out ResolverCollection resolverCollection))
             {
-                return resolver.instantiate();
+                if (resolverCollection.TryGetByLabel(label, out Resolver resolver))
+                {
+                    return resolver.Instantiate();
+                }
             }
 
             if (includeActiveScene && sceneResolvers.TryGetValue(GetActiveScene(), out SceneData sceneData))
             {
-                if (sceneData.resolvers.TryGetValue(contractType, out resolver))
+                if (sceneData.Resolvers.TryGetValue(contractType, out resolverCollection))
                 {
-                    return resolver.instantiate();
+                    if (resolverCollection.TryGetByLabel(label, out Resolver resolver))
+                    {
+                        return resolver.Instantiate();
+                    }
                 }
             }
 
             return default;
         }
         
-        private static object ResolveByTypeForScene(Type contractType, Scene scene)
+        private static object ResolveByTypeForScene(Type contractType, Scene scene, object label)
         {
             // Can happen if a registered type depends on another registered type.
-            if (register.TryGetValue(contractType, out Registry registry))
+            Registry registry = register.FirstOrDefault(r => r.ContractType == contractType && r.Label == label);
+            if (registry != null)
             {
                 CreateResolver(registry);
             }
 
             if (sceneResolvers.TryGetValue(scene, out SceneData sceneData))
             {
-                if (sceneData.resolvers.TryGetValue(contractType, out Resolver resolver))
+                if (sceneData.Resolvers.TryGetValue(contractType, out ResolverCollection resolverCollection))
                 {
-                    return resolver.instantiate();
+                    if (resolverCollection.TryGetByLabel(label, out Resolver resolver))
+                    {
+                        return resolver.Instantiate();
+                    }
                 }
             }
 
@@ -237,11 +255,12 @@ namespace Rehawk.ServiceInjection
         
         private static void CreateSingletonResolver(Registry registry)
         {
+            // (fred): Removed cause of labeled resolvers.
             // Don't create resolvers for already created types.
-            if ((!registry.IsSceneScoped && HasResolver(registry.ContractType, false)) || (registry.IsSceneScoped && HasSceneResolver(registry.ContractType, registry.Scene)))
-            {
-                return;
-            }
+            // if ((!registry.IsSceneScoped && HasResolver(registry.ContractType, false)) || (registry.IsSceneScoped && HasSceneResolver(registry.ContractType, registry.Scene)))
+            // {
+            //     return;
+            // }
 
             object instance = registry.Factory?.Invoke();
             if (instance == null)
@@ -251,11 +270,11 @@ namespace Rehawk.ServiceInjection
 
             if (!registry.IsSceneScoped)
             {
-                AddGlobalResolver(registry.ContractType, () => instance);
+                AddGlobalResolver(registry.ContractType, registry.Label, () => instance);
             }
             else
             {
-                AddSceneResolver(registry.Scene, registry.ContractType, () => instance);
+                AddSceneResolver(registry.Scene, registry.ContractType, registry.Label, () => instance);
             }
         }
 
@@ -269,28 +288,41 @@ namespace Rehawk.ServiceInjection
 
             if (!registry.IsSceneScoped)
             {
-                AddGlobalResolver(registry.ContractType, () => factory());
+                AddGlobalResolver(registry.ContractType, registry.Label, () => factory());
             }
             else
             {
-                AddSceneResolver(registry.Scene, registry.ContractType, () => factory());
+                AddSceneResolver(registry.Scene, registry.ContractType, registry.Label, () => factory());
             }
         }
 
-        private static void AddGlobalResolver(Type contractType, Func<object> resolver)
+        private static void AddGlobalResolver(Type contractType, object label, Func<object> resolver)
         {
-            globalResolvers.Add(contractType, new Resolver
+            if (!globalResolvers.TryGetValue(contractType, out ResolverCollection collection))
             {
-                instantiate = resolver
+                collection = new ResolverCollection();
+                globalResolvers.Add(contractType, collection);
+            }
+            
+            collection.Add(label, new Resolver
+            {
+                Instantiate = resolver
             });
         }
 
-        private static void AddSceneResolver(Scene scene, Type contractType, Func<object> resolver)
+        private static void AddSceneResolver(Scene scene, Type contractType, object label, Func<object> resolver)
         { 
             SceneData sceneData = GetOrCreateSceneData(scene);
-            sceneData.resolvers.Add(contractType, new Resolver
+            
+            if (!sceneData.Resolvers.TryGetValue(contractType, out ResolverCollection collection))
             {
-                instantiate = resolver
+                collection = new ResolverCollection();
+                sceneData.Resolvers.Add(contractType, collection);
+            }
+            
+            collection.Add(label, new Resolver
+            {
+                Instantiate = resolver
             });
         }
 
@@ -300,11 +332,11 @@ namespace Rehawk.ServiceInjection
 
             if (!sceneResolvers.TryGetValue(scene, out sceneData))
             {
-                GameObject sceneObj  = new GameObject($"ServiceLocator - Scene: {scene.name}");
+                var sceneObj  = new GameObject($"ServiceLocator - Scene: {scene.name}");
                 
                 sceneResolvers[scene] = sceneData = new SceneData
                 {
-                    gameObject = sceneObj
+                    GameObject = sceneObj
                 };
             }
 
@@ -386,7 +418,7 @@ namespace Rehawk.ServiceInjection
             else
             {
                 SceneData sceneData = GetOrCreateSceneData(scene);
-                instance = sceneData.gameObject.AddComponent(concreteType);
+                instance = sceneData.GameObject.AddComponent(concreteType);
             }
 
             return instance;
@@ -407,7 +439,15 @@ namespace Rehawk.ServiceInjection
                 foreach (ParameterInfo parameter in parameterInfos)
                 {
                     // TODO: Handle IEnumerator exception.
-
+                    
+                    object label = DEFAULT_LABEL;
+                    
+                    var injectAttribute = parameter.GetCustomAttribute<InjectAttribute>();
+                    if (injectAttribute != null)
+                    {
+                        label = injectAttribute.Label;
+                    }
+                    
                     // Try to resolve the parameter from the arguments.
                     if (argumentCollection.TryResolve(parameter.ParameterType, out object parameterInstance))
                     {
@@ -415,7 +455,7 @@ namespace Rehawk.ServiceInjection
                     }
                     else
                     {
-                        parameterInstance = ResolveByType(parameter.ParameterType);
+                        parameterInstance = ResolveByType(parameter.ParameterType, label);
                         parameters.Add(parameterInstance);
                     }
                 }
@@ -452,7 +492,7 @@ namespace Rehawk.ServiceInjection
                         }
                         else
                         {
-                            parameterInstance = ResolveByType(field.FieldType);
+                            parameterInstance = ResolveByType(field.FieldType, injectAttribute.Label);
                             field.SetValue(instance, parameterInstance);
                         }
                     }
@@ -482,7 +522,7 @@ namespace Rehawk.ServiceInjection
                         }
                         else
                         {
-                            parameterInstance = ResolveByType(property.PropertyType);
+                            parameterInstance = ResolveByType(property.PropertyType, injectAttribute.Label);
                             property.SetValue(instance, parameterInstance);
                         }
                     }
@@ -517,7 +557,7 @@ namespace Rehawk.ServiceInjection
                         }
                         else
                         {
-                            parameterInstance = ResolveByType(parameter.ParameterType);
+                            parameterInstance = ResolveByType(parameter.ParameterType, injectAttribute.Label);
                             parameters.Add(parameterInstance);
                         }
                     }
@@ -563,12 +603,11 @@ namespace Rehawk.ServiceInjection
         /// </summary>
         public static void ResetScene(Scene scene)
         {
-            SceneData sceneData;
-            if (sceneResolvers.TryGetValue(scene, out sceneData))
+            if (sceneResolvers.TryGetValue(scene, out SceneData sceneData))
             {
-                if (sceneData.gameObject != null)
+                if (sceneData.GameObject != null)
                 {
-                    Object.Destroy(sceneData.gameObject);
+                    Object.Destroy(sceneData.GameObject);
                 }
 
                 sceneResolvers.Remove(scene);
@@ -635,13 +674,12 @@ namespace Rehawk.ServiceInjection
         /// <returns>True if resolver exists, false otherwise.</returns>
         public static bool HasSceneResolver(Type contractType, Scene scene)
         {
-            SceneData sceneData;
-            if (!sceneResolvers.TryGetValue(scene, out sceneData))
+            if (!sceneResolvers.TryGetValue(scene, out SceneData sceneData))
             {
                 return false;
             }
 
-            return sceneData.resolvers.ContainsKey(contractType);
+            return sceneData.Resolvers.ContainsKey(contractType);
         }
 
         private static Scene GetActiveScene()
@@ -656,13 +694,44 @@ namespace Rehawk.ServiceInjection
         
         private class SceneData
         {
-            public readonly Dictionary<Type, Resolver> resolvers = new Dictionary<Type, Resolver>();
-            public GameObject gameObject;
+            public Dictionary<Type, ResolverCollection> Resolvers { get; } = new();
+            public GameObject GameObject { get; set; }
         }
         
         private class Resolver
         {
-            public Func<object> instantiate;
+            public Func<object> Instantiate { get; set; }
+            public string Label { get; set; }
+        }
+
+        private class ResolverCollection
+        {
+            private readonly Dictionary<object, Resolver> labeledResolvers = new();
+            private Resolver defaultResolver;
+
+            public bool TryGetByLabel(object label, out Resolver resolver)
+            {
+                if (label == null)
+                {
+                    resolver = defaultResolver;
+                    return resolver != null;
+                }
+                
+                return labeledResolvers.TryGetValue(label, out resolver);
+            }
+            
+            public void Add(object label, Resolver resolver)
+            {
+                if (defaultResolver == null || label == null)
+                {
+                    defaultResolver = resolver;
+                }
+
+                if (label != null)
+                {
+                    labeledResolvers[label] = resolver;
+                }
+            }
         }
     }
 }
