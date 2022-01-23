@@ -260,19 +260,27 @@ namespace Rehawk.ServiceInjection
                 return;
             }
 
-            object instance = registry.Factory?.Invoke();
-            if (instance == null)
+            object instance;
+            
+            if (registry.Factory != null)
+            {
+                instance = registry.Factory.Invoke();
+            }
+            else
             {
                 instance = CreateInstance(registry.ConcreteType, !registry.IsSceneScoped, registry.Scene, registry.OnInstantiate, registry.Arguments, registry.GetLazyArguments);
             }
 
-            if (!registry.IsSceneScoped)
+            if (instance != null)
             {
-                AddGlobalResolver(registry.ContractType, registry.Label, () => instance);
-            }
-            else
-            {
-                AddSceneResolver(registry.Scene, registry.ContractType, registry.Label, () => instance);
+                if (!registry.IsSceneScoped)
+                {
+                    AddGlobalResolver(registry.ContractType, registry.Label, () => instance);
+                }
+                else
+                {
+                    AddSceneResolver(registry.Scene, registry.ContractType, registry.Label, () => instance);
+                }
             }
         }
 
