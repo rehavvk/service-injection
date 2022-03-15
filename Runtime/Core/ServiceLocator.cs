@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -14,12 +14,12 @@ namespace Rehawk.ServiceInjection
         public const string MULTISCENE_GAME_OBJECT_NAME = "ServiceLocator - Multi-scene";
         public const object DEFAULT_LABEL = null;
         
-        private static readonly Dictionary<Type, ResolverCollection> globalResolvers = new();
-        private static readonly Dictionary<Scene, SceneData> sceneResolvers = new();
+        private static readonly Dictionary<Type, ResolverCollection> globalResolvers = new Dictionary<Type, ResolverCollection>();
+        private static readonly Dictionary<Scene, SceneData> sceneResolvers = new Dictionary<Scene, SceneData>();
         
-        private static readonly List<Registry> register = new();
+        private static readonly List<Registry> register = new List<Registry>();
 
-        private static readonly List<Scene> tempSceneList = new();
+        private static readonly List<Scene> tempSceneList = new List<Scene>();
         
         private static GameObject multiSceneGameObject;
 
@@ -700,7 +700,7 @@ namespace Rehawk.ServiceInjection
         
         private class SceneData
         {
-            public Dictionary<Type, ResolverCollection> Resolvers { get; } = new();
+            public Dictionary<Type, ResolverCollection> Resolvers { get; } = new Dictionary<Type, ResolverCollection>();
             public GameObject GameObject { get; set; }
         }
         
@@ -712,7 +712,7 @@ namespace Rehawk.ServiceInjection
 
         private class ResolverCollection
         {
-            private readonly Dictionary<object, Resolver> labeledResolvers = new();
+            private readonly Dictionary<object, Resolver> labeledResolvers = new Dictionary<object, Resolver>();
             private Resolver defaultResolver;
 
             public bool TryGetByLabel(object label, out Resolver resolver)
