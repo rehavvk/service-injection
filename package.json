@@ -1,6 +1,6 @@
 {
 	"name":"com.rehawk.service-injection",
-	"version":"0.1.12",
+	"version":"0.1.13",
 	"displayName":"Service Injection",
 	"unity":"2020.1",
 	"author":{
