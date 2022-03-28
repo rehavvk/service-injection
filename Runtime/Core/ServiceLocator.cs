@@ -14,12 +14,12 @@ namespace Rehawk.ServiceInjection
         public const string MULTISCENE_GAME_OBJECT_NAME = "ServiceLocator - Multi-scene";
         public const object DEFAULT_LABEL = null;
         
-        private static readonly Dictionary<Type, ResolverCollection> globalResolvers = new();
-        private static readonly Dictionary<Scene, SceneData> sceneResolvers = new();
+        private static readonly Dictionary<Type, ResolverCollection> globalResolvers = new Dictionary<Type, ResolverCollection>();
+        private static readonly Dictionary<Scene, SceneData> sceneResolvers = new Dictionary<Scene, SceneData>();
         
-        private static readonly List<Registry> register = new();
+        private static readonly List<Registry> register = new List<Registry>();
 
-        private static readonly List<Scene> tempSceneList = new();
+        private static readonly List<Scene> tempSceneList = new List<Scene>();
         
         private static GameObject multiSceneGameObject;
 
@@ -128,7 +128,6 @@ namespace Rehawk.ServiceInjection
         ///     Searches for a global object first, if nothing is found and <paramref name="includeActiveScene" /> is true then it
         ///     searches for a scene specific resolver.
         ///     Make sure the type is registered first.
-        ///     <seealso cref="ResolveFromScene{T}(string)" />
         /// </summary>
         /// <typeparam name="T">The type to locate an implementation for.</typeparam>
         /// <param name="label">Whether to search for a labeled resolver.</param>
@@ -139,7 +138,25 @@ namespace Rehawk.ServiceInjection
         /// </returns>
         public static T Resolve<T>(object label = DEFAULT_LABEL, bool includeActiveScene = true)
         {
-            return (T) ResolveByType(typeof(T), label, includeActiveScene);
+            return (T) Resolve(typeof(T), label, includeActiveScene);
+        }
+
+        /// <summary>
+        ///     Locates and returns a transient object or singleton of the specified type.
+        ///     Searches for a global object first, if nothing is found and <paramref name="includeActiveScene" /> is true then it
+        ///     searches for a scene specific resolver.
+        ///     Make sure the type is registered first.
+        /// </summary>
+        /// <param name="type">The type to locate an implementation for.</param>
+        /// <param name="label">Whether to search for a labeled resolver.</param>
+        /// <param name="includeActiveScene">Whether to search for a scene specific resolver if a global one isn't found.</param>
+        /// <returns>
+        ///     The transient object or singleton that is mapped to the specified type.
+        ///     If nothing is registered the default value for the type is returned.
+        /// </returns>
+        public static object Resolve(Type type, object label = DEFAULT_LABEL, bool includeActiveScene = true)
+        {
+            return ResolveByType(type, label, includeActiveScene);
         }
 
         /// <summary>
@@ -154,9 +171,24 @@ namespace Rehawk.ServiceInjection
         /// </returns>
         public static T ResolveFromScene<T>(object label = DEFAULT_LABEL)
         {
-            return ResolveFromScene<T>(GetActiveScene(), label);
+            return (T) ResolveFromScene(typeof(T), GetActiveScene(), label);
         }
         
+        /// <summary>
+        ///     Locates and returns a transient object or singleton of the specified type for the currently active scene.
+        ///     Make sure the type is registered first.
+        /// </summary>
+        /// <param name="type">The type to locate an implementation for.</param>
+        /// <param name="label">Whether to search for a labeled resolver.</param>
+        /// <returns>
+        ///     The transient object or singleton that is mapped to the specified type.
+        ///     If nothing is registered the default value for the type is returned.
+        /// </returns>
+        public static object ResolveFromScene(Type type, object label = DEFAULT_LABEL)
+        {
+            return ResolveFromScene(type, GetActiveScene(), label);
+        }
+
         /// <summary>
         ///     Locates and returns a transient object or singleton of the specified type for the given scene.
         ///     Make sure the type is registered first.
@@ -170,7 +202,23 @@ namespace Rehawk.ServiceInjection
         /// </returns>
         public static T ResolveFromScene<T>(Scene scene, object label = DEFAULT_LABEL)
         {
-            return (T) ResolveByTypeForScene(typeof(T), scene, label);
+            return (T) ResolveFromScene(typeof(T), scene, label);
+        }
+
+        /// <summary>
+        ///     Locates and returns a transient object or singleton of the specified type for the given scene.
+        ///     Make sure the type is registered first.
+        /// </summary>
+        /// <param name="type">The type to locate an implementation for.</param>
+        /// <param name="scene">Specify the scene in which the resolver should be searched for.</param>
+        /// <param name="label">Whether to search for a labeled resolver.</param>
+        /// <returns>
+        ///     The transient object or singleton that is mapped to the specified type.
+        ///     If nothing is registered the default value for the type is returned.
+        /// </returns>
+        public static object ResolveFromScene(Type type, Scene scene, object label = DEFAULT_LABEL)
+        {
+            return ResolveByTypeForScene(type, scene, label);
         }
 
         /// <summary>
@@ -453,7 +501,7 @@ namespace Rehawk.ServiceInjection
                     }
                     
                     // Try to resolve the parameter from the arguments.
-                    if (argumentCollection.TryResolve(parameter.ParameterType, out object parameterInstance))
+                    if (argumentCollection.TryPop(parameter.ParameterType, out object parameterInstance))
                     {
                         parameters.Add(parameterInstance);
                     }
@@ -490,7 +538,7 @@ namespace Rehawk.ServiceInjection
                     if (field.GetValue(instance) == null)
                     {
                         // Try to resolve the parameter from the arguments.
-                        if (argumentCollection.TryResolve(field.FieldType, out object parameterInstance))
+                        if (argumentCollection.TryPop(field.FieldType, out object parameterInstance))
                         {
                             field.SetValue(instance, parameterInstance);
                         }
@@ -520,7 +568,7 @@ namespace Rehawk.ServiceInjection
                     if (property.GetValue(instance) == null)
                     {
                         // Try to resolve the parameter from the arguments.
-                        if (argumentCollection.TryResolve(property.PropertyType, out object parameterInstance))
+                        if (argumentCollection.TryPop(property.PropertyType, out object parameterInstance))
                         {
                             property.SetValue(instance, parameterInstance);
                         }
@@ -555,7 +603,7 @@ namespace Rehawk.ServiceInjection
                         // TODO: Handle Array/List exception.
 
                         // Try to resolve the parameter from the arguments.
-                        if (argumentCollection.TryResolve(parameter.ParameterType, out object parameterInstance))
+                        if (argumentCollection.TryPop(parameter.ParameterType, out object parameterInstance))
                         {
                             parameters.Add(parameterInstance);
                         }

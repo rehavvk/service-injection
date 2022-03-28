@@ -17,9 +17,12 @@ namespace Rehawk.ServiceInjection
             }
         }
 
-        public bool TryResolve(Type type, out object result)
+        public bool TryPop(Type type, out object result)
         {
             result = arguments.FirstOrDefault(type.IsInstanceOfType);
+
+            arguments.Remove(result);
+            
             return result != null;
         }
     }
