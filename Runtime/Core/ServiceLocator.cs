@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -748,7 +748,7 @@ namespace Rehawk.ServiceInjection
         
         private class SceneData
         {
-            public Dictionary<Type, ResolverCollection> Resolvers { get; } = new();
+            public Dictionary<Type, ResolverCollection> Resolvers { get; } = new Dictionary<Type, ResolverCollection>();
             public GameObject GameObject { get; set; }
         }
         
@@ -760,7 +760,7 @@ namespace Rehawk.ServiceInjection
 
         private class ResolverCollection
         {
-            private readonly Dictionary<object, Resolver> labeledResolvers = new();
+            private readonly Dictionary<object, Resolver> labeledResolvers = new Dictionary<object, Resolver>();
             private Resolver defaultResolver;
 
             public bool TryGetByLabel(object label, out Resolver resolver)
