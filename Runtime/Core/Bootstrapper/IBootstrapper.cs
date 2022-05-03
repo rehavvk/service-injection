@@ -10,14 +10,14 @@ namespace Rehawk.ServiceInjection
         void Boot();
         
         /// <summary>
+        /// Is called after all bootstrappers of the context are booted and before the resolve of already queued instances happens.
+        /// </summary>
+        void BootCompleted();
+
+        /// <summary>
         /// Is called to handle resolving of queued instances by cref="QueueForResolve{T}(T instance)"
         /// </summary>
         void Resolve();
-        
-        /// <summary>
-        /// Is called after all bootstrappers of the bootstrapper's context are booted.
-        /// </summary>
-        void BootCompleted();
 
         /// <inheritdoc cref="ServiceLocator.Register{T}()"/>
         Registry<T, T> Register<T>();
