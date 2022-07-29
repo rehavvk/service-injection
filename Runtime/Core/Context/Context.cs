@@ -23,12 +23,12 @@ namespace Rehawk.ServiceInjection
             
             foreach (IBootstrapper bootstrapper in monoBootstrapper)
             {
-                bootstrapper.Resolve();
+                bootstrapper.BootCompleted();
             }
-            
+
             foreach (IBootstrapper bootstrapper in monoBootstrapper)
             {
-                bootstrapper.BootCompleted();
+                bootstrapper.Resolve();
             }
             
             isInitialized = true;

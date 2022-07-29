@@ -29,6 +29,9 @@ namespace Rehawk.ServiceInjection
             ResetGlobal();
             ResetScenes();
             
+            register.Clear();
+            tempSceneList.Clear();
+            
             SceneManager.sceneUnloaded += OnSceneUnloaded;
         }
 

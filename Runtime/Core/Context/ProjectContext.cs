@@ -84,6 +84,12 @@ namespace Rehawk.ServiceInjection
             }
         }
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void OnSubsystemRegistration()
+        {
+            instance = null;
+        }
+
         public static GameObject TryGetPrefab()
         {
             ProjectContext[] prefabs = Resources.LoadAll<ProjectContext>(PROJECT_CONTEXT_RESOURCE_PATH);
