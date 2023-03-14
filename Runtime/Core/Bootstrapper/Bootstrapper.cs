@@ -1,11 +1,9 @@
-﻿#if UNITY_EDITOR
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Rehawk.ServiceInjection
 {
-    public abstract class EditModeBootstrapper : IBootstrapper
+    public class Bootstrapper : IBootstrapper
     {
         private readonly Queue<object> queuedForResolve = new Queue<object>();
 
@@ -28,7 +26,7 @@ namespace Rehawk.ServiceInjection
             OnBootCompleted();
         }
 
-        protected abstract void Boot();
+        protected virtual void Boot() {}
         protected virtual void OnBootCompleted() {}
         
         /// <inheritdoc/>
@@ -86,5 +84,3 @@ namespace Rehawk.ServiceInjection
         }
     }
 }
-
-#endif

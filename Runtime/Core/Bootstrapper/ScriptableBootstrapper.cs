@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Rehawk.ServiceInjection
 {
-    public abstract class MonoBootstrapper : MonoBehaviour, IBootstrapper
+    public abstract class ScriptableBootstrapper : ScriptableObject, IBootstrapper
     {
         private readonly IBootstrapper bootstrapper = new Bootstrapper();
         
