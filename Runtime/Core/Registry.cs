@@ -167,7 +167,7 @@ namespace Rehawk.ServiceInjection
         /// <summary>
         ///     Registers a set of arguments which will be used during the injection process. Arguments are preferred and only if they do not contain a matching instance will an attempt be made to pull a registered instance.
         /// </summary>
-        /// <param name="method">The mothod which will be called to receive arguments.</param>
+        /// <param name="method">The method which will be called to receive arguments.</param>
         public Registry<TContract, TConcrete> WithLazyArguments(Func<object[]> method)
         {
             this.getLazyArguments = method;
