@@ -1,4 +1,6 @@
 # Unity Service Injection Framework
+[![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](LICENSE)
+
 Flexible Dependency Injection designed specifically for the Unity Engine. 
 This lightweight and intuitive framework is designed to seamlessly integrate with Unity's native workflow, 
 providing a straightforward approach to managing dependencies in your game.
