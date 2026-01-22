@@ -1,6 +1,6 @@
 {
 	"name": "com.rehawk.service-injection",
-	"version": "0.1.2",
+	"version": "0.1.3",
 	"displayName": "Service Injection",
 	"description": "Flexible Dependency Injection designed specifically for the Unity Engine. This lightweight and intuitive framework is designed to seamlessly integrate with Unity's native workflow, providing a straightforward approach to managing dependencies in your game.",
 	"unity": "2021.3",
