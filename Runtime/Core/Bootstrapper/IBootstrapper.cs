@@ -2,6 +2,10 @@
 
 namespace Rehawk.ServiceInjection
 {
+    /// <summary>
+    /// Represents the contract for a bootstrapper that defines methods for registering,
+    /// resolving, and managing service dependencies for injection.
+    /// </summary>
     public interface IBootstrapper
     {
         /// <summary>
@@ -44,7 +48,7 @@ namespace Rehawk.ServiceInjection
         object CreateInstance(Type type, params object[] args);
 
         /// <summary>
-        ///     Registers a instance to which will be injected after the boot process.
+        /// Registers a instance to which will be injected after the boot process.
         /// </summary>
         /// <param name="instance">The instance which will injected to.</param>
         void QueueForResolve<T>(T instance);

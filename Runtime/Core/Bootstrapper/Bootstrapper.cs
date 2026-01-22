@@ -3,6 +3,12 @@ using System.Collections.Generic;
 
 namespace Rehawk.ServiceInjection
 {
+    /// <summary>
+    /// Provides functionality for bootstrapping services into the service container.
+    /// The Bootstrapper class allows for the registration of services and management
+    /// of their lifecycle (singleton, transient, factory-based) using a fluent API.
+    /// It serves as the base implementation for dependency injection setup.
+    /// </summary>
     public class Bootstrapper : IBootstrapper
     {
         private readonly Queue<object> queuedForResolve = new Queue<object>();

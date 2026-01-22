@@ -3,6 +3,17 @@ using UnityEngine;
 
 namespace Rehawk.ServiceInjection
 {
+    /// <summary>
+    /// Provides an abstract base class for creating scriptable bootstrappers in Unity.
+    /// </summary>
+    /// <remarks>
+    /// The <c>ScriptableBootstrapper</c> class serves as a scriptable object-based implementation
+    /// for managing service registration and dependency injection in Unity projects.
+    /// It leverages an underlying <c>IBootstrapper</c> to provide functionality for
+    /// registering, resolving, and creating instances of services or objects.
+    /// Derived classes must implement the <see cref="Boot"/> method to specify
+    /// the registration logic for the services or dependencies.
+    /// </remarks>
     public abstract class ScriptableBootstrapper : ScriptableObject, IBootstrapper
     {
         private readonly IBootstrapper bootstrapper = new Bootstrapper();

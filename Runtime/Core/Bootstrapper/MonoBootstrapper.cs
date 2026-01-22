@@ -3,6 +3,10 @@ using UnityEngine;
 
 namespace Rehawk.ServiceInjection
 {
+    /// <summary>
+    /// Represents an abstract base class that facilitates the bootstrapping process
+    /// for service registration and dependency injection in a Unity MonoBehaviour context.
+    /// </summary>
     public abstract class MonoBootstrapper : MonoBehaviour, IBootstrapper
     {
         private readonly IBootstrapper bootstrapper = new Bootstrapper();

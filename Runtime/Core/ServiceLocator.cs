@@ -8,6 +8,9 @@ using Object = UnityEngine.Object;
 
 namespace Rehawk.ServiceInjection
 {
+    /// <summary>
+    /// A static service locator implementation for dependency registration and resolution in multi-scene and global contexts.
+    /// </summary>
     public static class ServiceLocator
     {
         public const string MULTISCENE_GAME_OBJECT_NAME = "ServiceLocator - Multi-scene";
@@ -55,7 +58,7 @@ namespace Rehawk.ServiceInjection
         }
         
         /// <summary>
-        ///     Registers a concrete resolver of the given type.
+        /// Registers a concrete resolver of the given type.
         /// </summary>
         /// <typeparam name="T">The type of the singleton.</typeparam>
         public static Registry<T, T> Register<T>()
@@ -66,7 +69,7 @@ namespace Rehawk.ServiceInjection
         }
         
         /// <summary>
-        ///     Registers a concrete resolver of the type <typeparamref name="TConcrete" /> for the contract type <typeparamref name="TContract" />.
+        /// Registers a concrete resolver of the type <typeparamref name="TConcrete" /> for the contract type <typeparamref name="TContract" />.
         /// </summary>
         /// <typeparam name="TContract">The contract type that will be mapped to <typeparamref name="TConcrete" />.</typeparam>
         /// <typeparam name="TConcrete">The concrete singleton implementation.</typeparam>
@@ -78,7 +81,7 @@ namespace Rehawk.ServiceInjection
         }
         
         /// <summary>
-        ///     Registers a specific instance to the concrete type.
+        /// Registers a specific instance to the concrete type.
         /// </summary>
         /// <param name="instance">The instance which will be resolved.</param>
         public static Registry<T, T> RegisterInstance<T>(T instance)
@@ -89,7 +92,7 @@ namespace Rehawk.ServiceInjection
         }
 
         /// <summary>
-        ///     Registers a specific instance of the concrete type <typeparamref name="TConcrete" /> to the contract type of <typeparamref name="TContract" />.
+        /// Registers a specific instance of the concrete type <typeparamref name="TConcrete" /> to the contract type of <typeparamref name="TContract" />.
         /// </summary>
         /// <typeparam name="TContract">The contract type that will be mapped to <typeparamref name="TConcrete" />.</typeparam>
         /// <typeparam name="TConcrete">The concrete singleton implementation.</typeparam>
@@ -102,7 +105,7 @@ namespace Rehawk.ServiceInjection
         }
 
         /// <summary>
-        ///     Registers a specific factory to the concrete type.
+        /// Registers a specific factory to the concrete type.
         /// </summary>
         /// <param name="factory">The factory which will be called to create a new instance.</param>
         public static Registry<T, T> RegisterFactory<T>(Func<T> factory)
@@ -113,7 +116,7 @@ namespace Rehawk.ServiceInjection
         }
 
         /// <summary>
-        ///     Registers a specific factory of the concrete type <typeparamref name="TConcrete" /> to the contract type of <typeparamref name="TContract" />.
+        /// Registers a specific factory of the concrete type <typeparamref name="TConcrete" /> to the contract type of <typeparamref name="TContract" />.
         /// </summary>
         /// <typeparam name="TContract">The contract type that will be mapped to <typeparamref name="TConcrete" />.</typeparam>
         /// <typeparam name="TConcrete">The concrete singleton implementation.</typeparam>
@@ -126,17 +129,17 @@ namespace Rehawk.ServiceInjection
         }
 
         /// <summary>
-        ///     Locates and returns a transient object or singleton of the specified type.
-        ///     Searches for a global object first, if nothing is found and <paramref name="includeActiveScene" /> is true then it
-        ///     searches for a scene specific resolver.
-        ///     Make sure the type is registered first.
+        /// Locates and returns a transient object or singleton of the specified type.
+        /// Searches for a global object first, if nothing is found and <paramref name="includeActiveScene" /> is true then it
+        /// searches for a scene specific resolver.
+        /// Make sure the type is registered first.
         /// </summary>
         /// <typeparam name="T">The type to locate an implementation for.</typeparam>
         /// <param name="label">Whether to search for a labeled resolver.</param>
         /// <param name="includeActiveScene">Whether to search for a scene specific resolver if a global one isn't found.</param>
         /// <returns>
-        ///     The transient object or singleton that is mapped to the specified type.
-        ///     If nothing is registered for <typeparamref name="T" /> the default value for the type is returned.
+        /// The transient object or singleton that is mapped to the specified type.
+        /// If nothing is registered for <typeparamref name="T" /> the default value for the type is returned.
         /// </returns>
         public static T Resolve<T>(object label = DEFAULT_LABEL, bool includeActiveScene = true)
         {
@@ -144,17 +147,17 @@ namespace Rehawk.ServiceInjection
         }
 
         /// <summary>
-        ///     Locates and returns a transient object or singleton of the specified type.
-        ///     Searches for a global object first, if nothing is found and <paramref name="includeActiveScene" /> is true then it
-        ///     searches for a scene specific resolver.
-        ///     Make sure the type is registered first.
+        /// Locates and returns a transient object or singleton of the specified type.
+        /// Searches for a global object first, if nothing is found and <paramref name="includeActiveScene" /> is true then it
+        /// searches for a scene specific resolver.
+        /// Make sure the type is registered first.
         /// </summary>
         /// <param name="type">The type to locate an implementation for.</param>
         /// <param name="label">Whether to search for a labeled resolver.</param>
         /// <param name="includeActiveScene">Whether to search for a scene specific resolver if a global one isn't found.</param>
         /// <returns>
-        ///     The transient object or singleton that is mapped to the specified type.
-        ///     If nothing is registered the default value for the type is returned.
+        /// The transient object or singleton that is mapped to the specified type.
+        /// If nothing is registered the default value for the type is returned.
         /// </returns>
         public static object Resolve(Type type, object label = DEFAULT_LABEL, bool includeActiveScene = true)
         {
@@ -162,14 +165,14 @@ namespace Rehawk.ServiceInjection
         }
 
         /// <summary>
-        ///     Locates and returns a transient object or singleton of the specified type for the currently active scene.
-        ///     Make sure the type is registered first.
+        /// Locates and returns a transient object or singleton of the specified type for the currently active scene.
+        /// Make sure the type is registered first.
         /// </summary>
         /// <typeparam name="T">The type to locate an implementation for.</typeparam>
         /// <param name="label">Whether to search for a labeled resolver.</param>
         /// <returns>
-        ///     The transient object or singleton that is mapped to the specified type.
-        ///     If nothing is registered for <typeparamref name="T" /> the default value for the type is returned.
+        /// The transient object or singleton that is mapped to the specified type.
+        /// If nothing is registered for <typeparamref name="T" /> the default value for the type is returned.
         /// </returns>
         public static T ResolveFromScene<T>(object label = DEFAULT_LABEL)
         {
@@ -183,8 +186,8 @@ namespace Rehawk.ServiceInjection
         /// <param name="type">The type to locate an implementation for.</param>
         /// <param name="label">Whether to search for a labeled resolver.</param>
         /// <returns>
-        ///     The transient object or singleton that is mapped to the specified type.
-        ///     If nothing is registered the default value for the type is returned.
+        /// The transient object or singleton that is mapped to the specified type.
+        /// If nothing is registered the default value for the type is returned.
         /// </returns>
         public static object ResolveFromScene(Type type, object label = DEFAULT_LABEL)
         {
@@ -199,8 +202,8 @@ namespace Rehawk.ServiceInjection
         /// <param name="scene">Specify the scene in which the resolver should be searched for.</param>
         /// <param name="label">Whether to search for a labeled resolver.</param>
         /// <returns>
-        ///     The transient object or singleton that is mapped to the specified type.
-        ///     If nothing is registered for <typeparamref name="T" /> the default value for the type is returned.
+        /// The transient object or singleton that is mapped to the specified type.
+        /// If nothing is registered for <typeparamref name="T" /> the default value for the type is returned.
         /// </returns>
         public static T ResolveFromScene<T>(Scene scene, object label = DEFAULT_LABEL)
         {
@@ -208,15 +211,15 @@ namespace Rehawk.ServiceInjection
         }
 
         /// <summary>
-        ///     Locates and returns a transient object or singleton of the specified type for the given scene.
-        ///     Make sure the type is registered first.
+        /// Locates and returns a transient object or singleton of the specified type for the given scene.
+        /// Make sure the type is registered first.
         /// </summary>
         /// <param name="type">The type to locate an implementation for.</param>
         /// <param name="scene">Specify the scene in which the resolver should be searched for.</param>
         /// <param name="label">Whether to search for a labeled resolver.</param>
         /// <returns>
-        ///     The transient object or singleton that is mapped to the specified type.
-        ///     If nothing is registered the default value for the type is returned.
+        /// The transient object or singleton that is mapped to the specified type.
+        /// If nothing is registered the default value for the type is returned.
         /// </returns>
         public static object ResolveFromScene(Type type, Scene scene, object label = DEFAULT_LABEL)
         {
@@ -224,7 +227,7 @@ namespace Rehawk.ServiceInjection
         }
 
         /// <summary>
-        ///     Finds all fields, properties and methods tagged with the inject attribute <see cref="InjectAttribute"/> and try's to resolve them.
+        /// Finds all fields, properties and methods tagged with the inject attribute <see cref="InjectAttribute"/> and try's to resolve them.
         /// </summary>
         /// <param name="instance">The instance to inject their dependencies.</param>
         public static void ResolveDependencies<T>(T instance)
@@ -398,7 +401,7 @@ namespace Rehawk.ServiceInjection
         }
 
         /// <summary>
-        ///     Creates a instance of the given generic type and injects it.
+        /// Creates an instance of the given generic type and injects it.
         /// </summary>
         public static T CreateInstance<T>(params object[] args)
         {
@@ -406,7 +409,7 @@ namespace Rehawk.ServiceInjection
         }
 
         /// <summary>
-        ///     Creates a instance of the given type and injects it.
+        /// Creates an instance of the given type and injects it.
         /// </summary>
         public static object CreateInstance(Type type, params object[] args)
         {

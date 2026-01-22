@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Rehawk.ServiceInjection
@@ -19,61 +18,31 @@ namespace Rehawk.ServiceInjection
         internal abstract Type ContractType { get; }
         internal abstract Type ConcreteType { get; }
 
-        internal bool AsSingle
-        {
-            get { return asSingle; }
-        }
+        internal bool AsSingle => asSingle;
 
-        internal object Label
-        {
-            get { return label; }
-        }
-        
-        internal bool IsSceneScoped
-        {
-            get { return scene.HasValue; }
-        }
+        internal object Label => label;
 
-        internal Action<object> OnInstantiate
-        {
-            get { return onInstantiate; }
-        }
-        
-        internal Func<object> Factory
-        {
-            get { return factory; }
-        }
+        internal bool IsSceneScoped => scene.HasValue;
 
-        public object[] Arguments
-        {
-            get { return arguments; }
-        }
+        internal Action<object> OnInstantiate => onInstantiate;
 
-        internal Func<object[]> GetLazyArguments
-        {
-            get { return getLazyArguments; }
-        }
+        internal Func<object> Factory => factory;
 
-        internal Scene Scene
-        {
-            get { return scene.GetValueOrDefault(); }
-        }
+        public object[] Arguments => arguments;
+
+        internal Func<object[]> GetLazyArguments => getLazyArguments;
+
+        internal Scene Scene => scene.GetValueOrDefault();
     }
 
     public class Registry<TContract, TConcrete> : Registry
     {
-        internal override Type ContractType
-        {
-            get { return typeof(TContract); }
-        }
+        internal override Type ContractType => typeof(TContract);
 
-        internal override Type ConcreteType
-        {
-            get { return typeof(TConcrete); }
-        }
-        
+        internal override Type ConcreteType => typeof(TConcrete);
+
         /// <summary>
-        ///     The contract type of <typeparamref name="TContract" /> will always resolved as the same instance of the type <typeparamref name="TConcrete" />.
+        /// The contract type of <typeparamref name="TContract" /> will always resolved as the same instance of the type <typeparamref name="TConcrete" />.
         /// </summary>
         public Registry<TContract, TConcrete> AsSingleton()
         {
@@ -82,7 +51,7 @@ namespace Rehawk.ServiceInjection
         }
         
         /// <summary>
-        ///     The contract type of <typeparamref name="TContract" /> will always resolved as a new instance of the type <typeparamref name="TConcrete" />.
+        /// The contract type of <typeparamref name="TContract" /> will always resolved as a new instance of the type <typeparamref name="TConcrete" />.
         /// </summary>
         public Registry<TContract, TConcrete> AsTransient()
         {
@@ -91,9 +60,9 @@ namespace Rehawk.ServiceInjection
         }
         
         /// <summary>
-        ///     Registers a specific instance to the contract type of <typeparamref name="TContract" />.
-        ///     <seealso cref="ServiceLocator.RegisterInstance{T}(T)" />
-        ///     <seealso cref="ServiceLocator.RegisterInstance{TContract, TConcrete}(TConcrete)" />
+        /// Registers a specific instance to the contract type of <typeparamref name="TContract" />.
+        /// <seealso cref="ServiceLocator.RegisterInstance{T}(T)" />
+        /// <seealso cref="ServiceLocator.RegisterInstance{TContract, TConcrete}(TConcrete)" />
         /// </summary>
         /// <param name="instance">The instance which will be resolved.</param>
         public Registry<TContract, TConcrete> FromInstance(TConcrete instance)
@@ -103,9 +72,9 @@ namespace Rehawk.ServiceInjection
         }
         
         /// <summary>
-        ///     Registers a specific factory to the contract type of <typeparamref name="TContract" />.
-        ///     <seealso cref="ServiceLocator.RegisterFactory{T}(Func{T})" />
-        ///     <seealso cref="ServiceLocator.RegisterFactory{TContract, TConcrete}(Func{TConcrete})" />
+        /// Registers a specific factory to the contract type of <typeparamref name="TContract" />.
+        /// <seealso cref="ServiceLocator.RegisterFactory{T}(Func{T})" />
+        /// <seealso cref="ServiceLocator.RegisterFactory{TContract, TConcrete}(Func{TConcrete})" />
         /// </summary>
         /// <param name="factory">The factory which will be called to create a new instance.</param>
         public Registry<TContract, TConcrete> FromFactory(Func<TConcrete> factory)
@@ -115,8 +84,8 @@ namespace Rehawk.ServiceInjection
         }
 
         /// <summary>
-        ///     Registers a scene-specific resolver of the type <typeparamref name="TConcrete" /> for the contract type <typeparamref name="TContract" />.
-        ///     <remarks>The resolver is registered for the active scene according to <see cref="SceneManager.GetActiveScene()" />.</remarks>
+        /// Registers a scene-specific resolver of the type <typeparamref name="TConcrete" /> for the contract type <typeparamref name="TContract" />.
+        /// <remarks>The resolver is registered for the active scene according to <see cref="SceneManager.GetActiveScene()" />.</remarks>
         /// </summary>
         public Registry<TContract, TConcrete> SceneScoped()
         {
@@ -125,7 +94,7 @@ namespace Rehawk.ServiceInjection
         }
         
         /// <summary>
-        ///     Registers a scene-specific resolver of the type <typeparamref name="TConcrete" /> for the contract type <typeparamref name="TContract" />.
+        /// Registers a scene-specific resolver of the type <typeparamref name="TConcrete" /> for the contract type <typeparamref name="TContract" />.
         /// </summary>
         /// <param name="scene">The scene to register the type for.</param>
         public Registry<TContract, TConcrete> SceneScoped(Scene scene)
@@ -135,7 +104,7 @@ namespace Rehawk.ServiceInjection
         }
 
         /// <summary>
-        ///     Registers a concrete singleton of the given type.
+        /// Registers a concrete singleton of the given type.
         /// </summary>
         public Registry<TContract, TConcrete> GlobalScoped()
         {
@@ -144,8 +113,8 @@ namespace Rehawk.ServiceInjection
         }
 
         /// <summary>
-        ///     Registers a method which will be called each time the concrete type <typeparamref name="TConcrete" /> is instantiated and fully injected.
-        ///     <remarks>Multiple callbacks are possible.</remarks>
+        /// Registers a method which will be called each time the concrete type <typeparamref name="TConcrete" /> is instantiated and fully injected.
+        /// <remarks>Multiple callbacks are possible.</remarks>
         /// </summary>
         /// <param name="method">The method which will be called.</param>
         public Registry<TContract, TConcrete> WithCallback(Action<TConcrete> method)
@@ -155,7 +124,7 @@ namespace Rehawk.ServiceInjection
         }
         
         /// <summary>
-        ///     Registers a set of arguments which will be used during the injection process. Arguments are preferred and only if they do not contain a matching instance will an attempt be made to pull a registered instance.
+        /// Registers a set of arguments which will be used during the injection process. Arguments are preferred and only if they do not contain a matching instance will an attempt be made to pull a registered instance.
         /// </summary>
         /// <param name="arguments">The additional arguments.</param>
         public Registry<TContract, TConcrete> WithArguments(params object[] arguments)
@@ -165,7 +134,7 @@ namespace Rehawk.ServiceInjection
         }
         
         /// <summary>
-        ///     Registers a set of arguments which will be used during the injection process. Arguments are preferred and only if they do not contain a matching instance will an attempt be made to pull a registered instance.
+        /// Registers a set of arguments which will be used during the injection process. Arguments are preferred and only if they do not contain a matching instance will an attempt be made to pull a registered instance.
         /// </summary>
         /// <param name="method">The method which will be called to receive arguments.</param>
         public Registry<TContract, TConcrete> WithLazyArguments(Func<object[]> method)

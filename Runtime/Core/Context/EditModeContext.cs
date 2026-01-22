@@ -6,6 +6,10 @@ using UnityEditor;
 
 namespace Rehawk.ServiceInjection
 {
+    /// <summary>
+    /// The EditModeContext class provides a static context for managing and running dependency
+    /// injection bootstrappers in Unity's edit mode through the Service Injection framework.
+    /// </summary>
     [InitializeOnLoad]
     public static class EditModeContext
     {
@@ -16,13 +20,22 @@ namespace Rehawk.ServiceInjection
             EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
             Run();
         }
-        
+
+        /// <summary>
+        /// Adds a bootstrapper to the EditModeContext and immediately runs the context to handle service registration and resolution.
+        /// </summary>
+        /// <param name="bootstrapper">The bootstrapper instance to be added to the context. This instance defines registration and dependency management for services.</param>
         public static void AddBootstrapper(IBootstrapper bootstrapper)
         {
             EditModeContext.bootstrapper.Add(bootstrapper);
             Run();
         }
-        
+
+        /// <summary>
+        /// Adds a bootstrapper of the specified type to the EditModeContext and immediately
+        /// runs the context to handle service registration and resolution.
+        /// </summary>
+        /// <typeparam name="T">The type of the bootstrapper to be added. This type must implement the IBootstrapper interface and have a parameterless constructor.</typeparam>
         public static void AddBootstrapper<T>() where T : IBootstrapper
         {
             AddBootstrapper(Activator.CreateInstance<T>());

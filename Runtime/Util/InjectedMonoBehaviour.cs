@@ -4,8 +4,8 @@ using UnityEngine.SceneManagement;
 namespace Rehawk.ServiceInjection
 {
     /// <summary>
-    ///     Derive from this instead of <c>MonoBehaviour</c> to inject all fields, properties or methods tagged with the inject attribute <see cref="InjectAttribute"/>.
-    ///     If you want to use Awake() in your script, override the method and call <c>base.Awake();</c> or <c>ResolveDependencies();</c>
+    /// Derive from this instead of <c>MonoBehaviour</c> to inject all fields, properties or methods tagged with the inject attribute <see cref="InjectAttribute"/>.
+    /// If you want to use Awake() in your script, override the method and call <c>base.Awake();</c> or <c>ResolveDependencies();</c>
     /// </summary>
     public abstract class InjectedMonoBehaviour : MonoBehaviour
     {

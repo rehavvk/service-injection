@@ -3,6 +3,11 @@ using UnityEngine.Assertions;
 
 namespace Rehawk.ServiceInjection
 {
+    /// <summary>
+    /// The ProjectContext class serves as the main context for the project, managing dependency injection
+    /// and maintaining a singleton instance throughout the application's lifecycle.
+    /// It is responsible for ensuring that only one instance is created and properly initialized.
+    /// </summary>
     public class ProjectContext : Context
     {
         private const string PROJECT_CONTEXT_RESOURCE_PATH = "ProjectContext";
@@ -107,7 +112,7 @@ namespace Rehawk.ServiceInjection
 		{
 			if (Application.isPlaying) 
 			{
-				GameObject.DontDestroyOnLoad(gameObject);
+				DontDestroyOnLoad(gameObject);
 			}
 		}
 		
